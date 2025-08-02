@@ -29,6 +29,7 @@ jobs:
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:$COMMIT_SHA
 
       - name: "Push Docker Images"
+        working-directory: pipeline-practice
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest
           COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
