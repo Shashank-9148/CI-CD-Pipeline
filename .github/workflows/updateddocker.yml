@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: "Build and Push Docker Image"
 
 on:
   push:
@@ -18,10 +18,12 @@ jobs:
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: "Build Docker Image"
+        working-directory: pipeline-practice
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest .
 
       - name: "Tag Image with Commit SHA"
+        working-directory: pipeline-practice
         run: |
           COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:$COMMIT_SHA
