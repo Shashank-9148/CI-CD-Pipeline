@@ -28,6 +28,16 @@ jobs:
           COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:$COMMIT_SHA
 
+      - name: "Scan Docker Image with Trivy"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref:${{ secrets.DOCKERHUB_USERNAME }}/ris.devops-practice-project:latest
+          format: table
+          exit-code: 0
+          ignore-unfixed: true
+          
+                     
+
       - name: "Push Docker Images"
         working-directory: pipeline-practice
         run: |
