@@ -1,0 +1,46 @@
+name: "Build and Push Docker Image"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "Log in to DockerHub"
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: "Build Docker Image"
+        working-directory: pipeline-practice
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest .
+
+      - name: "Tag Image with Commit SHA"
+        working-directory: pipeline-practice
+        run: |
+          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:$COMMIT_SHA
+
+      - name: "Scan Docker Image with Trivy"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref:${{ secrets.DOCKERHUB_USERNAME }}/ris.devops-practice-project:latest
+          format: table
+          exit-code: 0
+          ignore-unfixed: true
+          
+                     
+
+      - name: "Push Docker Images"
+        working-directory: pipeline-practice
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:latest
+          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-devops-app:$COMMIT_SHA
